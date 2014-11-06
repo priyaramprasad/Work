@@ -1,0 +1,21 @@
+date_default_timezone_set('America/New_York');
+
+$SOSE->Echo("<p>UserAgent = " . $SOSE->Env("USERAGENT") . "</p>");
+$SOSE->Echo("<p>Referer = " . $SOSE->Env("REFERER") . "</p>");
+$SOSE->Echo("<p>ClientIP = " . $SOSE->Env("CLIENTIP")  . "</p>");
+
+//local path for testing
+$fp = fopen('\\\\Sxatl.loc\\tc1\\sites\\TC1\\PNdev.TC1.dc.publicus.com\\logs\\Useragent.txt', 'a') or die("can't open file");
+
+//assets path setting
+$fp = fopen('\\\\sxatl.loc\\tc1\\assets\\PN\\logs\\Useragent.txt', 'a') or die("can't open file");
+
+		fwrite($fp, date("Y-m-d H:i:s") ."||". $SOSE->Env("CLIENTIP") ."||" . $SOSE->Env("USERAGENT") ."||". $SOSE->Env("REFERER") ."\n");
+fclose($fp);
+
+if (!empty($_SERVER['HTTP_REFERER'])){
+   $SOSE->echo("Location: ".$_SERVER['HTTP_REFERER']);}
+else
+{
+   $SOSE->echo("none");
+}
