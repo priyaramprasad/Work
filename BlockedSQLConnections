@@ -1,0 +1,176 @@
+/*
+First Pane
+----------------------------
+background -   processes running in the background 
+runnable   -   processes currently running - this number shouldn't get to high 
+sleeping - processes that are sleeping 
+suspended - processed that are suspended because of the runnable processes - This number shouldn't get to high 
+
+
+Second Pane
+----------------------------
+Show's which app pools are consuming the most cpu usage. 
+
+
+Third Pane
+------------------
+Shows which web server is consuming the most web servers 
+*/
+
+
+set nocount on
+
+Declare @totalnoOfConnections integer
+declare @totalNoOfBlockedSPID integer
+DECLARE @Table TABLE(
+        SPID INT,
+        Status VARCHAR(MAX),
+        LOGIN VARCHAR(MAX),
+        HostName VARCHAR(MAX),
+        BlkBy VARCHAR(MAX),
+        DBName VARCHAR(MAX),
+        Command VARCHAR(MAX),
+        CPUTime INT,
+        DiskIO INT,
+        LastBatch VARCHAR(MAX),
+        ProgramName VARCHAR(MAX),
+        SPID_1 INT,
+        REQUESTID INT
+)
+
+INSERT INTO @Table EXEC sp_who2
+select count(*), [Status]
+from @table
+group by [status]
+--print 'Total number of connections to the DB: ' + cast(@totalnoOfConnections as varchar(10))
+
+--select * from @table
+select 'kill ' + spid as killSPIDCommand, 'DBCC INPUTBUFFER(' + spid + ')' as SPIDInfo, totalcount
+from (
+select distinct BlkBy as spid,
+(select count(*) from @Table) as totalcount
+from @table
+where blkby <> '  .') q
+
+
+print 'Total number of waiting connection due to blocking SPID: ' + cast(@totalNoOfBlockedSPID as varchar(10))
+
+select COUNT(*), ProgramName
+from @table
+group by ProgramName
+order by COUNT(*) desc
+
+select COUNT(*), hostname
+from @table
+group by hostname
+order by COUNT(*) desc
+-- count based on login
+/*
+
+DBCC FREEPROCCACHE
+DBCC DROPCLEANBUFFERS
+
+*/
+
+-- count based on login
+/*
+select COUNT(*) as numberOfConnection, login
+from @table
+group by LOGIN
+order by COUNT(*) desc
+*/
+
+
+-- count based on login
+
+/*
+kill 99
+kill 223
+kill 230
+*/
+/*
+
+
+select COUNT(*) numberofConnectionForASsite, '------', HostName
+from @table
+where ProgramName = 'Pooled (e:\InetPub\DHapps\pbcs.dll v. 7.0.0sr13)'
+--where ProgramName = 'Pooled (e:\InetPub\RGapps\pbcs.dll v. 7.0.0sr13)'
+group by HostName
+--and Status <> 'sleeping'
+*/
+
+select 'SUSPENDED', *
+from @table
+--where ProgramName = 'Pooled (e:\InetPub\DHapps\pbcs.dll v. 7.0.0sr13)'
+--where ProgramName = 'Pooled (e:\InetPub\RGapps\pbcs.dll v. 7.0.0sr13)'
+where Status = 'SUSPENDED'
+order by CPUTime desc
+
+
+
+    
+select *
+from @table
+--where ProgramName = 'Pooled (e:\InetPub\DHapps\pbcs.dll v. 7.0.0sr13)'
+--where ProgramName = 'Pooled (e:\InetPub\RGapps\pbcs.dll v. 7.0.0sr13)'
+where Status <> 'sleeping'
+order by CPUTime desc
+--and Status <> 'sleeping'
+
+
+
+select COUNT(*), login
+from @table
+group by login
+
+select *
+from @Table
+where login='solrfeeder'
+
+
+
+
+-- total number of connections
+
+--
+/*
+declare @asql varchar(max)
+declare @t table ( x varchar(max), params int, eventinfo varchar(max))
+insert into @t
+EXEC('DBCC INPUTBUFFER(910)')
+
+select @asql = eventinfo from @t
+select eventinfo from @t
+print @asql
+
+kill 63
+kill 156
+kill 149
+
+DBCC INPUTBUFFER(365)
+*/
+/*
+kill 287
+kill 266
+kill 281
+kill 152
+kill 153
+kill 64
+*/
+--DBCC INPUTBUFFER(340)
+set nocount off
+
+/*
+
+exec sp_whoisactive
+
+DBCC INPUTBUFFER(628  )
+DBCC INPUTBUFFER(185  )
+
+
+DBCC INPUTBUFFER(198  )
+DBCC INPUTBUFFER(140  )
+DBCC FREEPROCCACHE
+DBCC DROPCLEANBUFFERS
+
+*/
